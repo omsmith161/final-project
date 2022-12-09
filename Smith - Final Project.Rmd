@@ -1,0 +1,130 @@
+---
+title: "Finding a Planet like Earth"
+author: "Olivia Smith"
+date: "2022-11-01"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r import NASA dataset, echo = FALSE}
+exoplanets <- read.csv("PS_2022.11.10_13.17.09.csv")
+```
+
+## Introduction
+
+Earth is the planet that we call home. It orbits a star that we call the Sun. Earth and seven other planets make up our solar system. This seems like common knowledge because it is the only solar system we have ever lived in. Up until 1988, we didn't think it was possible to find other solar systems, nevermind find those that have similar structure to our own. 
+    
+Exoplanets are planets that orbit a star other than the Sun (Cofield, 2018). Since their discovery in 1988, exoplanets have been on the forefront of astronomical research and 5,220 exoplanets have been confirmed since. To qualify as a planet, a detectable object in space must meet the following classifications: be big enough to have a magnitude of gravity that makes it spherical in shape, orbit a star, and have a gravitational field large enough that other objects in that star's orbit do not interfere (NASA, 2019). Other than that, exoplanets are more varied than we could have anticipated.  
+    
+Exoplanets can differ in characteristics like their surfaces structures and substrate's chemical composition, the size and temperature of the star they orbit, and what state of matter the majority of the planet is in. Among the variety of all of these characteristics, there are intriguing similarities and analogies we can make to Earth. Some exoplanets have water (frozen or otherwise), an atmosphere (comprised of a variety of gases), and/or orbit the star in the "goldilocks zone", which is the correct orbital radius from the star to possibly be habitable.   
+    
+In the search for life in the universe, it is expected that life would be properly sustained on a planet that is most similar to our own. Of the exoplanets observed and documented, many demonstrate characteristics that are intriguingly similar to Earth. Comparing exoplanet characteristics to Earth can provide insight as to how likely it is that we will find life on another planet that is similar to our own. 
+
+## Methods
+
+The data used in this project is from NASA's Exoplanet Archive from the Exoplanet Science Institute. This archive organizes exoplanet data and compares information about the host stars associated with them. These exoplanets have been discovered and qualified in multiple ways, including radial velocity which was more popular in earlier years, and transit detection now that better technology exists.   
+   
+R can be utilized to compare exoplanet characteristics to Earth's characteristics. In this project, I have compared solar system structure, star size, equilibrium temperature, as well as planet radius and mass. 
+
+## Results
+```{r figures1, echo = FALSE, warning = FALSE, fig.cap = "Number of exoplanets discovered per year since 1988", out.width= "75%", fig.align='center'}
+library(ggplot2)
+
+ggplot(data = exoplanets, aes(x = disc_year)) + geom_bar(fill = "lightblue") + theme_bw() + labs(x = "Year of Discovery", y = "Number of Exoplanets Discovered", fill = "Discovery Method") 
+
+invisible(table(exoplanets$disc_year))
+```
+
+Over the years, tens of thousands of exoplanets have been observed, but less than ten thousand have been confirmed based on NASA's criteria. 2016 was the strongest year for exoplanet discovery in which 12,829 planets were discovered. So far in 2022, 529 exoplanets have been discovered (Figure 1). 
+
+
+```{r figures2, echo = FALSE, warning = FALSE, fig.cap = "Contribution of discovery method improvements to volume of exoplanets discovery", out.width= "75%", fig.align='center'}
+
+ggplot(data = exoplanets, aes(x = discoverymethod)) + geom_bar(fill = "darkblue") + labs(x = "Discovery Method", y = "Number of Planets Discovered") + theme_bw() + theme(axis.text.x = element_text(angle = 35, hjust = 1))
+```
+
+The most common and effective discovery method is transit, accounting for 30,758 exoplanets discovered. The least-used discovery method is disk kinematics, accounting for only 1 discovery. Without the engineering of the transit discovery method, the observations needed to confirm 5,220 exoplanets would not have been feasible in the amount of time since the first discovery (Figure 2). 
+
+```{r figures3, echo = FALSE, warning = FALSE, fig.cap = "Solar system organization in mumber of stars vs number of planets", out.width= "75%", fig.align='center'}
+
+ggplot(data = exoplanets, aes(x = sy_snum, y = sy_pnum, color = sy_snum)) + geom_jitter() + theme_bw() + labs(x = "Number of Stars", y = "Number of Planets", color = "Number of Stars")
+
+invisible(table(exoplanets$sy_snum, exoplanets$sy_pnum))
+```
+
+In this figure, each point represents a solar system that has been observed (Figure 3). The most density on the graph is representative of solar systems that have 1 star with 1-5 planets orbiting it. This may be because we have not found additional exoplanets in those solar systems yet. Our solar system structure (1 star and 8 planets) is fairly uncommon, accounting for only 62 observations. The most common solar system structure is one exoplanet orbiting around 1 star, with 16,888 observations. Out of 33,715 observations, having only 62 solar systems with our same organizational structure means the frequency is 0.184%.
+
+```{r figures4, echo = FALSE, warning = FALSE, fig.cap = "Star radius vs mass", out.width= "75%", fig.align='center'}
+
+ggplot(data = exoplanets, aes(x = st_rad, y = st_mass)) + geom_point() + labs(x = "Star Radius (Stellar Radius Units)", y = "Star Mass (Stellar Mass Units)") 
+```
+
+Star commonalities can be displayed in terms of their sizes as radius and mass. I found it interesting that Stellar Radius Units references how many times the radius of our star can be fit into the value, while the same is true for Stellar Mass Units. The majority of stars have a radius and mass within 10 times and five times the size of our Sun, respectively (Figure 4). 
+
+```{r figures5, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Planets within 25 parsec of their star and their their thermal equilibrium temperature in comparison to Earth's habitable range (288-388K)", out.width= "75%", fig.align='center'}
+
+exoplanets3 <- read.csv("PSCompPars_2022.12.06_08.33.10.csv")
+
+exoplanets3[is.na(exoplanets3)] = 0
+
+invisible(library(tidyverse))
+
+rightdistance <- filter(exoplanets3, exoplanets3$sy_dist<25)
+
+rightdistance[is.na(rightdistance)] = 0
+
+rightdistance$habitable_temp <- rightdistance$pl_eqt > 288 & rightdistance$pl_eqt < 388
+
+ggplot(data = rightdistance, aes(x = sy_dist, y = pl_eqt)) + geom_point(aes(color = habitable_temp)) + labs(x = "Distance from Host Star (pc)", y = "Planet Equilibrium Temperature(K)", color = "Habitable Temperature?") + theme_bw()
+
+invisible(table(rightdistance$habitable_temp))
+```
+
+Of the planets within 25 parsecs of their star, only 26 were deemed to be within Earth's habitable equilibrium temperature range of 288-388K. Of 348 planets in the 25 parsec range, the likelihood of a planet being a habitable equilibrium temperature is 7.4% (Figure 5). 
+
+```{r radiushistogram, echo = FALSE, fig.cap = "Frequency of similar planet radii", out.width= "75%", fig.align='center'}
+
+hist(exoplanets3$pl_rade, breaks = 20, labels = TRUE, main = "", ylim = c(0,4000), col = "lightblue", xlab = "Planet Radius (Earth Radius)") 
+```
+
+Similar to Solar Radius Units, Earth Radius Units refer to how many times a planet's radius is larger than Earth's. Bins can be added to a histogram to account for radius range, where 3490 planets were within 5 times Earth's radius. This is a high frequency, meaning many planets have a relatively similar radius to Earth's (Figure 6).
+
+```{r radiushistogram2, warning = FALSE, echo = FALSE, out.width= "75%", fig.align='center', fig.cap="Frequency of similar planet mass"}
+
+hist(exoplanets3$pl_bmasse, breaks = 50, main = "", col = "darkblue", ylim = c(0,6000),xlab = "Planet Mass (Earth Mass)") 
+```
+
+5143 planets in this dataset were within 5000 times Earth's mass. This number seems very large, and illuminates the diversity of masses that exoplanets can adopt (Figure 7).   
+
+\newpage
+
+## Discussion
+
+Some conditions and features of our planet and solar system are fairly rare, while others are quite common.  
+
+Finding a planet in a large solar system with many planets is not a requirement for sustaining life. Based on the system's arrangement, however, planets closer to the star would have a higher equilibrium temperature. This may be crucial in determining whether the planet can contain liquid water or if the planet's temperature is within Earth's observed habitable range.  
+
+The star at the center of our solar system is relatively small compared to some stars at the center of other exoplanet systems. Our Sun is one Stellar Radius Unit and one Stellar Mass Unit, and the majority of stars in exoplanet systems are within 10 radius units and 5 mass units. This means that many systems in this data set have stars that are quite a bit bigger than our Sun. This could contribute to factors like planet equilibrium temperature, depending on how closely a planet orbits the star.    
+
+Relative distance from the star is a very important in determining whether the planet's temperature can support life. Planets within 25 parsecs of their star were not very likely to be within the habitable range. This may mean that planets relatively close to their star have the potential to support life that adopts different biochemistry based on the hotter environmental conditions.     
+
+Planet radius and mass can be important in determining the distribution thermal energy from the star as it revolves and orbits the sun. It was much more common for planets to be close to Earth's size and mass, meaning there may be physical properties that affected the conformation of the planet during its formation.  
+
+Although we are still quite a long way from discovering life on another planet, analyzing the characteristics of discovered exoplanets can provide valuable insight as to what features are common in the universe and which are unique to Earth. 
+
+## Bibliography
+
+Cofield, C. (2018, June 28). NASA used Earth as a laboratory to study distant worlds. Retrieved from Exoplanet Exploration: Planets Beyond Our Solar System: https://exoplanets.nasa.gov/news/1513/nasa-uses-earth-as-laboratory-to-study-distant-worlds/  
+
+NASA. (2019, December 19). What is a Planet? Retrieved from Solar System Exploration: Our Galactic Neighborhood: https://solarsystem.nasa.gov/planets/in-depth/
+
+
+
+
+
+
+
+
